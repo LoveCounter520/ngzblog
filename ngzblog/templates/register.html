@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>register</title>
+    <link href="/static/bootstrap-3.3.7/css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/register.css">
+</head>
+<body>
+<div class="container">
+	<div class="row row_login">
+		<div class="col-md-6 col-md-offset-3">
+			<div class="panel panel-info">
+		      <div class="panel-heading">
+		        <h3 class="panel-title text-center">注册博客 ID</h3>
+		      </div>
+		      <div class="panel-body">
+				            <form class="login-form">
+                                {% csrf_token %}
+                <div class="input-group">
+                    <span class="input-group-addon" id="basic-addon1"><label class="glyphicon glyphicon-user" for="{{ form_obj.username.id_for_label }}"></label></span>
+                    {{ form_obj.username }}
+                    <span class="help-block"></span>
+                </div>
+
+                <div class="input-group">
+                    <span class="input-group-addon" id="basic-addon1"><label class="glyphicon glyphicon-lock" for="{{ form_obj.password.id_for_label }}"></label></span>
+                    {{ form_obj.password }}
+                    <span class="help-block"></span>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon" id="basic-addon1"><label class="glyphicon glyphicon-lock" for="{{ form_obj.re_password.id_for_label }}"></label></span>
+                    {{ form_obj.re_password }}
+                    <span class="help-block"></span>
+                </div>
+                <div class="input-group">
+                    <label for="avatar">头像<img id="avatar-img" src="/static/default.png" alt="" style="height: 80px;width: 80px;margin-left: 15px"></label>
+                    <input type="file" accept="image/*" id="avatar" style="display: none;">
+                </div>
+                                    <div class="input-group">
+                        <span class="input-group-addon" id="basic-addon1"><label class="glyphicon glyphicon-barcode" for="v-code" style="display: block;"></label></span>
+                        <input type="text" id="v-code" class="form-control basic-addon1" placeholder="验证码" style="width: 200px;display: inline-block">
+                        <img src="/v-code/" id="i1" style="float: right">
+                    </div>
+
+                    <div class="row text-center">
+                        <p id="error-p" class="err-text"></p>
+                    </div>
+                <div class="text-center">
+                    <button id="reg-btn" type="button" class="btn btn-success">注册</button>
+                </div>
+
+                <div class="pull-right">
+                    <a href="/login/">已有账号，去登陆</a>
+                </div>
+                <br>
+                <div class="pull-right">
+                    <a href="/index/">注册什么的都去见鬼吧，我要学知识！</a>
+                </div>
+
+            </form>
+		      </div>
+		    </div>
+		</div>
+	</div>
+</div>
+</body>
+<script src="/static/js/jquery.js"></script>
+<script src="/static/bootstrap-3.3.7/js/bootstrap.js"></script>
+<script>
+    $("#reg-btn").click(function () {
+        // 1. 取到用户填写的数据
+        var fd = new FormData();
+        fd.append("username", $("#id_username").val());
+        fd.append("password", $("#id_password").val());
+        fd.append("re_password", $("#id_re_password").val());
+        fd.append("email", $("#id_email").val());
+        fd.append("v_code", $("#v-code").val());
+        fd.append("csrfmiddlewaretoken", $("[name='csrfmiddlewaretoken']").val());
+        fd.append('avatar', $("#avatar")[0].files[0]);
+        // 2. 往后端发post请求
+        $.ajax({
+            url: '/reg/',
+            type: 'post',
+            data: fd,
+            processData: false,
+            contentType: false,
+            success:function (res) {
+                console.log(res);
+                if (res.code === 2){
+                    // 验证码有错误
+                    $("#error-p").text(res.msg);
+                }else if (res.code === 0){
+                    // 注册成功
+                    location.href = res.msg;
+                }else if (res.code === 1){
+                    console.log(res.msg);
+                    // 遍历取出所有的错误提示信息，在页面上展示出来
+                    $.each(res.msg, function (k,v) {
+                        console.log($("#id_"+k).next().text(v[0]));
+                        $("#id_"+k).next().text(v[0]).parent().addClass('has-error');
+                    })
+                }
+            }
+        })
+    });
+
+    // 每一个input标签获取焦点的时候，把自己下面的span标签内容清空，把父标签的has-error样式移除
+    $("input.form-control").focus(function () {
+        $(this).val('').next("span").text('').parent().removeClass('has-error');
+    });
+
+    $("#v-code").focus(function () {
+        $(this).val('').next().next().text('');
+    });
+    // 前端页面实现头像预览
+    // 当用户选中文件之后，也就是头像的input标签有值时触发
+    $("#avatar").change(function () {
+        // 找到用户选中的那个文件
+        var file = this.files[0];
+        // 生成一个读文件的对象
+        var fr = new FileReader();
+        // 从文件中读取头像文件数据
+        fr.readAsDataURL(file);
+        // 等到读完之后
+        fr.onload = function () {
+            // 将头像img标签的src属性更换成我选中的那个文件
+            $("#avatar-img").attr("src", fr.result)
+        }
+    })
+
+    // 点击刷新验证码
+    $("#i1").click(function () {
+        // this.src += "?";
+        // 使用正则判断一下：如果原来的url有?就去掉，没有就加上
+        var url = this.src;
+        if (/\?$/.test(url)){
+            // 去掉最后的?
+            this.src = url.slice(0,-1);
+        }else {
+            this.src = url + "?";
+        }
+        //console.log(this.src);
+    })
+
+</script>
+</html>

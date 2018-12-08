@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% block page-main %}
+    <div class="col-md-12">
+        <div class="list-group" style="background-color: rgba(255,255,255,1);border: 1px solid rgba(247,238,214,1); width: 79%; margin-top: 15px; padding-left: 10px;">
+
+                    <h1>{{ article.title }}</h1>
+            <hr class="hr_1">
+                <p>{{ article.articledetail.content|safe }}</p>
+        </div>
+<div class="col-md-10">
+<div class="clearfix">
+        <div id="div_digg">
+            <!-- 点赞 -->
+            <div class="diggit digg" >
+                <span class="diggnum" id="digg_count">{{ article.up_count }}</span>
+            </div>
+            <!-- 反对 -->
+            <div class="buryit digg">
+                <span class="burynum" id="bury_count">{{ article.down_count }}</span>
+            </div>
+            <div class="clear"></div>
+            <!-- 提示信息 -->
+            <div class="diggword" id="digg_tips"></div>
+        </div>
+    </div>
+</div>
+    </div>
+
+{% csrf_token %}
+    <hr>
+        <!-- 点赞 开始-->
+
+
+    <!-- 点赞 结束-->
+
+    <!-- 评论展示区 开始 -->
+    <h4>评论：</h4>
+    <div>
+        <div class="list-group comment-list" style="width: 79%;">
+            {% for comment in comment_list %}
+                <div class="list-group-item" href="#" my-id="{{ comment.id }}">
+                    <h4 class="list-group-item-heading comment-header">
+                        <span>{{ forloop.counter }}楼</span>
+                        <span>{{ comment.create_time|date:'Y-m-d H:i' }}</span>
+                        <span>{{ comment.user.username }}</span>
+                        <span class="pull-right replay">回复</span>
+                    </h4>
+                    {% if comment.parent_comment %}
+                        <span style="display: block">@{{ comment.parent_comment.user.username }}</span>
+                        <p class="list-group-item-text well">
+                            {{ comment.parent_comment.content }}
+                        </p>
+                    {% endif %}
+                    <p class="list-group-item-text comment-content">
+                        {{ comment.content }}
+                    </p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <!-- 评论展示区 结束 -->
+    <hr>
+
+    <!-- 发表评论 开始 -->
+    <h4>发表评论</h4>
+    <div>
+        <span>用户名：</span>
+        <input type="text" value="{{ request.user.username }}" disabled>
+    </div>
+    <div>
+        <p>发表评论：</p>
+        <textarea name="" id="new-comment" cols="60" rows="10"></textarea>
+    </div>
+    <div>
+        <button id="submit-comment" class="btn btn-success">提交</button>
+    </div>
+    <!-- 发表评论 结束 -->
+
+
+    <div style="height: 300px"></div>
+
+{% endblock %}
+
+{% block page-js %}
+    <script>
+        $('.digg').click(function () {
+            if (!'{{ request.user.username }}'){
+                location.href='/login/?next={{ request.get_full_path }}'
+            }
+
+            var userId = '{{ request.user.id }}';
+            var articleId = '{{ article.id }}';
+            var isUP = $(this).hasClass('diggit');
+            //console.log(userId);
+            $.ajax({
+                url:'/dianzan/',
+                type:'post',
+                data:{
+                    csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val(),
+                    userId:userId,
+                    articleId:articleId,
+                    isUP:isUP
+                },
+                success:function (res) {
+                    //console.log(res);
+                    if (res.code !== 0){
+                        $('#digg_tips').text(res.msg)
+                    }else {
+                        if (isUP){
+                            var $UpSpan = $('$digg_count');
+                            $UpSpan.text(+$UpSpan.text()+1);
+                        } else {
+                            var $downSpan = $('$bury_count');
+                            $downSpan.text(+$downSpan.text()+1);
+                        }
+                        $('#digg_tips').text(res.msg)
+                    }
+                }
+            })
+        });
+
+        $('#submit-comment').click(function () {
+            var userId = '{{ request.user.id }}';
+            var content = $('#new-comment').val();
+            var articleId = '{{ article.id }}';
+            var parentId = $(this).data('pid') || '';
+            if (parentId){
+                content = content.slice(content.indexOf('\n')+1,);
+            }
+            $.ajax({
+                url:'/comment/',
+                type:'post',
+                data:{
+                    parent_id:parentId,
+                    user_id:userId,
+                    content:content,
+                    article_id:articleId,
+                    csrfmiddlewaretoken:$('[name="csrfmiddlewaretoken"]').val(),
+                },
+                success:function (res) {
+                    //console.log(res);
+                    if (res.code === 0){
+                        var data = res.data;
+                        var num = $('.comment-list>div').length + 1;
+                        var commentHtml = `
+                        <div href="#" class="list-group-item">
+                            <h4 class="list-group-item-heading comment-header">
+                                <span>${ num }楼</span>
+                                <span>${ data.create_time }</span>
+                                <span>${ data.username }</span>
+                                <span class="huifu pull-right replay">回复</span>
+                            </h4>
+                            <p class="list-group-item-text comment-content">
+                                ${ data.content }
+                            </p>
+                        </div>
+                        `;
+                        $('.comment-list').append(commentHtml);
+                        $('#new-comment').val('');
+                        $('#submit-comment').removeData('pid');
+                    }
+                }
+            })
+        });
+
+        $('.comment-list').on('click', '.replay', function () {
+            var replayName = $(this).prev().text();
+            $('#new-comment').focus().val('@'+replayName+'\n');
+            var pID = $(this).parent().parent().attr('my-id');
+            $('#submit-comment').data('pid',pID);
+        })
+    </script>
+{% endblock %}

@@ -1,0 +1,142 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    background-color: rgba(153, 153, 153, 0.8);
+}
+
+.navbar-inverse {
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+}
+
+.navbar-nav > li > a {
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+.navbar-brand {
+    height: 100px;
+    padding-top: 40px;
+}
+
+.navbar {
+    min-height: 100px;
+    margin-bottom: 0px;
+}
+
+.navbar-toggle {
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+.a-blog {
+    font-weight: bold;
+    font-size: 25px;
+}
+
+.title a {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.title-center {
+    margin-left: 70px;
+}
+
+.title2 a {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.title2 {
+    margin-left: 92px;
+}
+
+.title3 a {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.title3 {
+    margin-left: 175px;
+}
+
+.title4 a {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.title4 {
+    margin-left: 195px;
+}
+
+.title5 a {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.title5 {
+    margin-left: 185px;
+}
+
+.title6 a {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.title6 {
+    margin-left: 330px;
+}
+
+.na-2 {
+    background-color: rgba(222, 222, 222, 0.8);
+}
+
+.container-1 {
+    display: none;
+}
+
+.container-2 {
+    display: none;
+}
+
+.container-3 {
+    display: none;
+}
+
+.container-4 {
+    display: none;
+}
+
+.container-5 {
+    display: none;
+}
+
+.content_top {
+    margin-top: 50px;
+}
+
+.panel-heading {
+    background-color: rgba(34, 34, 34, 1);
+}
+
+.bottom_down {
+    height: 130px;
+    background-color: rgba(199, 199, 199, 1);
+}
+
+.back_to_top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    border: 1px solid #888;
+}
+
+.panel-footer-mytext {
+    margin: 18px 0;
+    border: 0;
+}
